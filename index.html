@@ -783,6 +783,62 @@ html[data-theme="dark"] .career-dont{background:#3a1b1a;color:#ffc2bc}
 .tpl-ats .ats-skill-line b,.tpl-ats-modern .ats-skill-line b{color:#111}
 .tpl-ats .ats-note,.tpl-ats-modern .ats-note{font-size:9.2pt;color:#444;margin:.5mm 0 0}
 
+/* ============ pro — احترافي نظيف (clean professional) ============ */
+.tpl-pro{padding:14mm 16mm 12mm;font-size:9.6pt}
+/* الترويسة */
+.tpl-pro .cv-head{padding-bottom:5mm;border-bottom:.35mm solid var(--cv-line)}
+.tpl-pro .cv-name{font-size:21pt;color:var(--cv-ink);line-height:1.12}
+.tpl-pro .cv-role{font-size:10.6pt;font-weight:600;color:var(--cv-accent);margin-top:1.6mm}
+.tpl-pro .cv-contact{margin-top:3.2mm;justify-content:flex-start;gap:4.5mm;flex-wrap:wrap;font-size:8.6pt;color:var(--cv-mut)}
+.tpl-pro .cv-contact .cv-c{display:inline-flex;align-items:center;gap:1.7mm}
+.tpl-pro .cv-contact .cv-c a{display:inline-flex;align-items:center;gap:1.7mm;color:var(--cv-mut);text-decoration:none}
+.tpl-pro .cv-contact .cv-c a:hover{color:var(--cv-accent)}
+.tpl-pro .cv-contact .cv-c svg{width:3.3mm;height:3.3mm;color:var(--cv-accent);flex:0 0 auto}
+.tpl-pro .cv-contact a{color:var(--cv-mut);text-decoration:none}
+.tpl-pro .cv-contact a:hover{color:var(--cv-accent)}
+.tpl-pro .pro-wa{color:var(--cv-accent);font-weight:600}
+/* الشريط الدقيق تحت الترويسة */
+.tpl-pro .pro-rule{margin-top:4.4mm;border-bottom:.3mm solid var(--cv-line);position:relative}
+.tpl-pro .pro-rule::after{content:"";position:absolute;inset-inline-end:0;bottom:-.3mm;width:34mm;height:.9mm;background:var(--cv-accent);border-radius:.45mm}
+/* الأقسام */
+.tpl-pro .cv-sec{margin-top:6.6mm}
+.tpl-pro .cv-h{font-size:10.8pt;font-weight:700;color:var(--cv-accent);margin:0 0 2.8mm;display:flex;align-items:center;gap:2.6mm}
+.tpl-pro .cv-h::before{content:"";width:2.3mm;height:2.3mm;background:var(--cv-accent);border-radius:.4mm;flex:0 0 auto}
+.tpl-pro .cv-h::after{content:"";height:.25mm;background:var(--cv-line);flex:1}
+.tpl-pro .cv-summary{font-size:9.4pt;color:var(--cv-ink);line-height:1.62}
+/* المهارات — مجموعات وخطوط نظيفة */
+.tpl-pro .pro-skills{display:grid;grid-template-columns:1fr;gap:0}
+.tpl-pro .pro-skill-cat{font-size:8.4pt;font-weight:700;color:var(--cv-accent);letter-spacing:.07em;margin:2.2mm 0 1.2mm}
+.tpl-pro .pro-skill-row{display:grid;grid-template-columns:1fr 1fr;gap:0 7mm}
+.tpl-pro .pro-skill-line{display:flex;justify-content:space-between;align-items:center;gap:3mm;font-size:9.2pt;color:var(--cv-ink);padding:1.15mm 0;border-bottom:.2mm solid var(--cv-line)}
+.tpl-pro .pro-skill-line .cv-dots{width:5.6mm;display:inline-flex;gap:.8mm;flex:0 0 auto}
+.tpl-pro .pro-skill-line .cv-dots i{width:1.4mm;height:1.4mm;border-radius:50%;background:var(--cv-line);display:inline-block}
+.tpl-pro .pro-skill-line .cv-dots i.on{background:var(--cv-accent)}
+/* الخبرات والمؤهل — Items نظيفة */
+.tpl-pro .cv-item{margin-top:3.4mm}
+.tpl-pro .cv-item:first-child{margin-top:0}
+.tpl-pro .cv-ihead{display:flex;justify-content:space-between;align-items:baseline;gap:5mm}
+.tpl-pro .cv-t{font-size:10pt;font-weight:700;color:var(--cv-ink)}
+.tpl-pro .cv-d{font-size:8.5pt;color:var(--cv-mut);font-weight:500;white-space:nowrap}
+.tpl-pro .cv-o{font-size:9pt;color:var(--cv-accent);font-weight:600;margin-top:.7mm}
+.tpl-pro .cv-desc ul{margin:1.7mm 0 0;padding:0;list-style:none}
+.tpl-pro .cv-desc li{font-size:9.2pt;color:var(--cv-ink);line-height:1.52;padding:.55mm 0 .55mm 4.6mm;position:relative;border-bottom:.2mm solid var(--cv-line)}
+.tpl-pro .cv-desc li:last-child{border-bottom:0}
+.tpl-pro .cv-desc li::before{content:"";position:absolute;inset-inline-end:0;top:50%;width:1.6mm;height:1.6mm;border-radius:50%;background:var(--cv-accent);transform:translateY(-50%)}
+.tpl-pro .cv-desc p{font-size:9.2pt;color:var(--cv-ink);line-height:1.55;margin:1.7mm 0 0}
+/* اللغات — صفوف عمودين */
+.tpl-pro .pro-langs{display:grid;grid-template-columns:1fr 1fr;gap:0 7mm}
+.tpl-pro .pro-lang-line{display:flex;justify-content:space-between;align-items:center;gap:3mm;font-size:9.2pt;color:var(--cv-ink);padding:1.15mm 0;border-bottom:.2mm solid var(--cv-line)}
+.tpl-pro .pro-lang-line em{font-style:normal;color:var(--cv-mut);font-size:8.4pt}
+/* المعلومات الإضافية */
+.tpl-pro .pro-ready{list-style:none;margin:0;padding:0}
+.tpl-pro .pro-ready li{font-size:9.2pt;color:var(--cv-ink);padding:1.05mm 0 1.05mm 4.6mm;position:relative;border-bottom:.2mm solid var(--cv-line)}
+.tpl-pro .pro-ready li:last-child{border-bottom:0}
+.tpl-pro .pro-ready li::before{content:"";position:absolute;inset-inline-end:0;top:50%;width:1.6mm;height:1.6mm;border-radius:50%;background:var(--cv-accent);transform:translateY(-50%)}
+/* التذييل */
+.tpl-pro .pro-foot{margin-top:7mm;padding-top:3mm;border-top:.3mm solid var(--cv-line);display:flex;justify-content:space-between;align-items:center;gap:5mm;font-size:7.8pt;color:var(--cv-mut)}
+.tpl-pro .pro-foot-phone{font-weight:600;color:var(--cv-accent);font-size:8.4pt}
+
 </style>
 
 <style id="app-v2">

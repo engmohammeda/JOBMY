@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""توليد نسخة Word احترافية (RTL) من السيرة الذاتية."""
+"""
+توليد نسخة Word احترافية نظيف (RTL) من السيرة الذاتية — القالب «الاحترافي النظيف».
+عمود واحد، مساحات بيضاء، خطوط نظيفة، عناوين ملوّنة — بدون بطاقات أو تكدّس.
+"""
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.section import WD_SECTION
+from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 from docx.opc.constants import RELATIONSHIP_TYPE as RT
+import os
 
-INK    = RGBColor(0x12, 0x26, 0x3F)
-ACCENT = RGBColor(0x1C, 0x5B, 0x8F)
-ACC2   = RGBColor(0x0F, 0x3F, 0x66)
-BODY   = RGBColor(0x26, 0x37, 0x4F)
-MUTED  = RGBColor(0x6B, 0x7A, 0x90)
-FONT   = "Segoe UI"
+INK    = RGBColor(0x14, 0x20, 0x30)
+BODY   = RGBColor(0x2C, 0x3C, 0x52)
+MUTED  = RGBColor(0x68, 0x76, 0x88)
+ACCENT = RGBColor(0x18, 0x46, 0x6E)
+ACC2   = RGBColor(0x1E, 0x54, 0x80)
+FONT   = "Cairo"
 
 doc = Document()
 
 # ---------- إعداد الصفحة ----------
 sec = doc.sections[0]
 sec.page_width, sec.page_height = Cm(21.0), Cm(29.7)
-sec.top_margin, sec.bottom_margin = Cm(1.15), Cm(1.0)
-sec.left_margin, sec.right_margin = Cm(1.35), Cm(1.35)
+sec.top_margin, sec.bottom_margin = Cm(1.2), Cm(1.0)
+sec.left_margin, sec.right_margin = Cm(1.4), Cm(1.4)
 # اتجاه الصفحة من اليمين إلى اليسار
 sPr = sec._sectPr
 bidi = OxmlElement('w:bidi'); sPr.append(bidi)
@@ -38,7 +42,7 @@ if rf is None:
 for a in ('w:ascii', 'w:hAnsi', 'w:cs', 'w:eastAsia'):
     rf.set(qn(a), FONT)
 style.paragraph_format.space_after = Pt(0)
-style.paragraph_format.line_spacing = 1.18
+style.paragraph_format.line_spacing = 1.15
 
 
 def _run(p, text, size=10, bold=False, color=BODY, italic=False):
@@ -52,7 +56,7 @@ def _run(p, text, size=10, bold=False, color=BODY, italic=False):
     f = rPr.find(qn('w:rFonts'))
     if f is None:
         f = OxmlElement('w:rFonts'); rPr.append(f)
-    for a in ('w:ascii', 'w:hAnsi', 'w:cs'):
+    for a in ('w:ascii', 'w:hAnsi', 'w:cs', 'w:eastAsia'):
         f.set(qn(a), FONT)
     rtl = OxmlElement('w:rtl'); rPr.append(rtl)
     if bold:
@@ -69,7 +73,7 @@ def add_link(p, text, url, size=9, bold=False, color=ACCENT):
     new_run = OxmlElement('w:r')
     rPr = OxmlElement('w:rPr')
     f = OxmlElement('w:rFonts')
-    for a in ('w:ascii', 'w:hAnsi', 'w:cs'):
+    for a in ('w:ascii', 'w:hAnsi', 'w:cs', 'w:eastAsia'):
         f.set(qn(a), FONT)
     rPr.append(f)
     c = OxmlElement('w:color'); c.set(qn('w:val'), '%02X%02X%02X' % (color[0], color[1], color[2])); rPr.append(c)
@@ -79,206 +83,314 @@ def add_link(p, text, url, size=9, bold=False, color=ACCENT):
         rPr.append(OxmlElement('w:b')); rPr.append(OxmlElement('w:bCs'))
     rPr.append(OxmlElement('w:rtl'))
     new_run.append(rPr)
-    t = OxmlElement('w:t'); t.text = text
-    t.set(qn('xml:space'), 'preserve')
+    t = OxmlElement('w:t'); t.set(qn('xml:space'), 'preserve')
+    t.text = text
     new_run.append(t)
     hyperlink.append(new_run)
     p._p.append(hyperlink)
 
 
-def para(align=WD_ALIGN_PARAGRAPH.RIGHT, before=0, after=0, line=1.18,
-         indent=0, hang=0, keep=False):
+def para(size=10, bold=False, color=BODY, before=0, after=0, align=None, ls=1.15):
     p = doc.add_paragraph()
     pf = p.paragraph_format
-    pf.alignment = align
     pf.space_before = Pt(before)
     pf.space_after = Pt(after)
-    pf.line_spacing = line
-    if indent:
-        pf.right_indent = Cm(indent)
-    if hang:
-        pf.first_line_indent = Cm(-hang)
-    if keep:
-        pf.keep_with_next = True
-    pPr = p._p.get_or_add_pPr()
-    b = OxmlElement('w:bidi'); pPr.append(b)
+    pf.line_spacing = ls
+    if align is not None:
+        p.alignment = align
     return p
 
 
-def bottom_border(p, color="1C5B8F", size=12, space=2):
+def border_bottom(p, color="D9E0EA", size=6):
+    """خط سفلي دقيق لفقرة."""
     pPr = p._p.get_or_add_pPr()
-    bdr = OxmlElement('w:pBdr')
-    bot = OxmlElement('w:bottom')
-    bot.set(qn('w:val'), 'single'); bot.set(qn('w:sz'), str(size))
-    bot.set(qn('w:space'), str(space)); bot.set(qn('w:color'), color)
-    bdr.append(bot); pPr.append(bdr)
+    pBdr = OxmlElement('w:pBdr')
+    bottom = OxmlElement('w:bottom')
+    bottom.set(qn('w:val'), 'single')
+    bottom.set(qn('w:sz'), str(size))
+    bottom.set(qn('w:space'), '2')
+    bottom.set(qn('w:color'), color)
+    pBdr.append(bottom)
+    pPr.append(pBdr)
 
 
-def section(title, en=""):
-    p = para(before=9, after=3, keep=True)
-    bottom_border(p, color="DFE6EE", size=6, space=1)
-    _run(p, "▌ ", size=11.5, bold=True, color=ACCENT)
-    _run(p, title, size=11.5, bold=True, color=ACC2)
+def shade(p, color="18466E"):
+    """تظليل خلفية فقرة (للعناوين)."""
+    pPr = p._p.get_or_add_pPr()
+    shd = OxmlElement('w:shd')
+    shd.set(qn('w:val'), 'clear')
+    shd.set(qn('w:color'), 'auto')
+    shd.set(qn('w:fill'), color)
+    pPr.append(shd)
+
+
+def no_borders(table):
+    """إزالة حدود الجدول (للقوائم النظيفة)."""
+    tbl = table._tbl
+    tblPr = tbl.tblPr
+    borders = OxmlElement('w:tblBorders')
+    for edge in ('top', 'left', 'bottom', 'right', 'insideH', 'insideV'):
+        el = OxmlElement('w:' + edge)
+        el.set(qn('w:val'), 'none')
+        el.set(qn('w:sz'), '0')
+        el.set(qn('w:space'), '0')
+        el.set(qn('w:color'), 'auto')
+        borders.append(el)
+    tblPr.append(borders)
+
+
+def light_bottom(table):
+    """حدود سفلية فاتحة فقط داخل الجدول."""
+    tbl = table._tbl
+    tblPr = tbl.tblPr
+    borders = OxmlElement('w:tblBorders')
+    for edge in ('top', 'left', 'bottom', 'right', 'insideV'):
+        el = OxmlElement('w:' + edge)
+        el.set(qn('w:val'), 'none')
+        el.set(qn('w:sz'), '0')
+        el.set(qn('w:space'), '0')
+        el.set(qn('w:color'), 'auto')
+        borders.append(el)
+    insideH = OxmlElement('w:insideH')
+    insideH.set(qn('w:val'), 'single')
+    insideH.set(qn('w:sz'), '4')
+    insideH.set(qn('w:space'), '0')
+    insideH.set(qn('w:color'), 'E2E8F1')
+    borders.append(insideH)
+    tblPr.append(borders)
+
+
+def dots(n):
+    on = "●" * max(0, min(5, int(n)))
+    off = "○" * (5 - len(on))
+    return on + off
+
+
+# ===================== الترويسة =====================
+p = para(before=0)
+_run(p, "محمد البخيتي", size=20, bold=True, color=INK)
+
+p = para(before=2, after=2)
+_run(p, "موظف مكتب خدمات عامة — دعم إداري وتنظيم مكتبي", size=11, bold=True, color=ACCENT)
+
+p = para(before=2)
+_run(p, "سنتان خبرة في إعداد المستندات وتلخيص المعاملات وخدمة المراجعين  •  إجادة تامة للحاسب والأوفيس  •  سرعة تعلّم استثنائية",
+     size=8.4, color=MUTED)
+
+p = para(before=5, after=1)
+add_link(p, "الجوال: +966 56 674 3293", "tel:+966566743293", size=8.3, bold=False, color=ACCENT)
+_run(p, "   |   ", size=8.3, color=MUTED)
+add_link(p, "واتساب", "https://wa.me/966566743293", size=8.3, color=ACCENT)
+_run(p, "   |   البريد: ", size=8.3, color=MUTED)
+add_link(p, "Mohammedalbkhty@gmail.com", "mailto:Mohammedalbkhty@gmail.com", size=8.3, color=ACCENT)
+
+p = para(before=1)
+add_link(p, "لينكدإن", "https://www.linkedin.com/in/mohammed-albukhaiti-215a41302/", size=8.2, color=ACCENT)
+_run(p, "   |   الموقع الشخصي: ", size=8.2, color=MUTED)
+add_link(p, "engmohammeda.github.io/portfolio", "https://engmohammeda.github.io/portfolio/", size=8.2, color=ACCENT)
+_run(p, "   |   الرياض — غرب الرياض", size=8.2, color=MUTED)
+
+p = para(before=1)
+_run(p, "العمر: 24 سنة   |   مقيم في الرياض — متاح للعمل فورًا", size=8.2, color=MUTED)
+
+# شريط دقيق تحت الترويسة
+p = para(before=4)
+border_bottom(p, color="18466E", size=12)
+_run(p, "", size=1)
+
+
+# ===================== الأقسام =====================
+def section_heading(title, en=""):
+    p = para(before=10, after=4)
+    _run(p, title, size=11, bold=True, color=ACC2)
     if en:
-        _run(p, "   " + en, size=7.5, color=RGBColor(0x9A, 0xA9, 0xBC))
+        _run(p, "     " + en, size=6.5, color=RGBColor(0x9A, 0xAE, 0xC0))
+    border_bottom(p, color="E2E8F1", size=4)
 
 
-def bullets(items, size=9.6, after=1.5):
-    for it in items:
-        p = para(after=after, line=1.22, indent=0.55, hang=0.42)
-        _run(p, "•  ", size=size, color=ACCENT, bold=True)
-        # دعم **عريض**
-        parts = it.split("**")
-        for i, seg in enumerate(parts):
-            if seg:
-                _run(p, seg, size=size, bold=(i % 2 == 1), color=INK if i % 2 == 1 else BODY)
+# ---------------- الملف المهني ----------------
+section_heading("الملف المهني", "PROFILE")
+summary = (
+    "موظف مكتب خدمات عامة منظم وخدوم، خبرة سنتين في مكتب أعمال ومكتبة: "
+    "أُعدّ المستندات والخطابات وأنسّقها وأدقّقها، وأُلخّص المعاملات في ملخصات واضحة، "
+    "وأُدخل البيانات وأؤرشفها، وأستقبل المراجعين وأتابع طلباتهم حتى الإنجاز. "
+    "أُجيد الحاسب وبرامج الأوفيس (Word وExcel وPowerPoint والبريد) إجادة تامة، "
+    "وأستخدم أدوات الذكاء الاصطناعي في تلخيص المعاملات وصياغة الخطابات وتنظيم العمل. "
+    "أتمتّع بحسن التعامل والأخلاق والالتزام، وأتعلّم أي نظام جديد بسرعة — "
+    "وأبحث عن استقرار مهني طويل في غرب الرياض."
+)
+p = para(after=0, ls=1.3)
+_run(p, summary, size=9.3)
 
+# ---------------- المهارات ----------------
+section_heading("المهارات الأساسية", "CORE SKILLS")
 
-# ================= الترويسة =================
-p = para(WD_ALIGN_PARAGRAPH.RIGHT, after=0)
-_run(p, "محمد البخيتي", size=25, bold=True, color=INK)
-
-p = para(after=1)
-_run(p, "موظف مكتب خدمات عامة — دعم إداري وتنظيم مكتبي", size=12.5, bold=True, color=ACCENT)
-
-p = para(after=5)
-_run(p, "سنتان خبرة في إعداد المستندات وتلخيص المعاملات وخدمة المراجعين  •  إجادة تامة للحاسب والأوفيس  •  أدوات ذكاء اصطناعي وتقنية ترفع إنتاجية المكتب",
-     size=8.8, color=MUTED)
-
-p = para(after=1)
-_run(p, "الجوال: ", size=9, color=BODY)
-add_link(p, "+966 56 674 3293", "tel:+966566743293", size=9, bold=True)
-_run(p, "  (اتصال مباشر)    |    واتساب: ", size=9, color=BODY)
-add_link(p, "اضغط للمحادثة", "https://wa.me/966566743293", size=9, bold=True)
-_run(p, "    |    البريد: ", size=9, color=BODY)
-add_link(p, "Mohammedalbkhty@gmail.com", "mailto:Mohammedalbkhty@gmail.com", size=9, bold=True)
-
-p = para(after=4)
-_run(p, "لينكدإن: ", size=9, color=BODY)
-add_link(p, "linkedin.com/in/mohammed-albukhaiti", "https://www.linkedin.com/in/mohammed-albukhaiti-215a41302/", size=9)
-_run(p, "    |    الموقع الشخصي: ", size=9, color=BODY)
-add_link(p, "engmohammeda.github.io/portfolio", "https://engmohammeda.github.io/portfolio/", size=9)
-_run(p, "    |    الرياض — غرب الرياض  •  العمر: 24 سنة", size=9, color=BODY)
-bottom_border(p, color="1C5B8F", size=14, space=3)
-
-p = para(after=2)
-_run(p, "الحالة النظامية: تأشيرة زيارة عائلية — جاهز لاستكمال إجراءات التوظيف    |    متاح للعمل فورًا",
-     size=9, color=BODY)
-
-# ================= الملف المهني =================
-section("الملف المهني", "PROFILE")
-p = para(WD_ALIGN_PARAGRAPH.JUSTIFY, after=0, line=1.3)
-_run(p, "موظف مكتبي منظّم وخدوم أمتلك خبرة سنتين في مكتب أعمال ومكتبة، عملت خلالها على إعداد المستندات "
-        "والخطابات وتنسيقها، وتلخيص المعاملات وتجهيز ملخصات واضحة عنها، وإدخال البيانات وأرشفتها، "
-        "واستقبال المراجعين والتعامل معهم حتى إنجاز طلباتهم. أُجيد تشغيل الحاسب وبرامج الأوفيس "
-        "(Word وExcel وPowerPoint والبريد الإلكتروني) وأتعامل مع الطباعة والمسح الضوئي والأرشفة "
-        "بسرعة ودقة. أتميّز بحسن التعامل والأخلاق والالتزام والهدوء تحت الضغط، وأتعلّم أي نظام أو منصة "
-        "إلكترونية جديدة بسرعة، وأبحث عن فرصة أخدم فيها مكتب خدمات عامة في غرب الرياض وأضيف قيمة "
-        "حقيقية من أول أسبوع.", size=10.2)
-
-# ================= المهارات =================
-section("المهارات الأساسية", "CORE SKILLS")
-skills = [
+skill_groups = [
     ("الحاسب وبرامج الأوفيس", [
-        "**Word:** صياغة وتنسيق الخطابات والقوالب ودمج المراسلات",
-        "**Excel:** بيانات وجداول ومعادلات (SUM / IF / VLOOKUP)",
-        "**PowerPoint** للعروض، **Outlook** للبريد والمرفقات",
-        "Google Docs + Sheets + Drive للعمل السحابي",
+        ("Word — صياغة وتنسيق المستندات والخطابات", 5),
+        ("Excel — جداول، معادلات، تقارير", 4),
+        ("PowerPoint — عروض تقديمية", 4),
+        ("Outlook و Gmail — بريد ومراسلات", 4),
+        ("Google Docs / Sheets / Drive — عمل سحابي", 4),
     ]),
     ("الأعمال المكتبية والسكرتارية", [
-        "صياغة الخطابات والمستندات الرسمية بالعربية والإنجليزية",
-        "تلخيص المعاملات وتجهيز مذكرات وملخصات واضحة بسرعة",
-        "الأرشفة الورقية والإلكترونية وتنظيم الملفات",
-        "إدخال البيانات وتدقيقها قبل الطباعة والإرسال",
+        ("صياغة الخطابات والمستندات الرسمية", 5),
+        ("تلخيص المعاملات وتجهيز الملخصات", 5),
+        ("الأرشفة الورقية والإلكترونية", 4),
+        ("إدخال البيانات وتدقيقها", 4),
     ]),
     ("خدمة العملاء والتعامل مع الجمهور", [
-        "استقبال المراجعين والرد على الاستفسارات بلباقة واحترافية",
-        "الاستماع الفعّال وتوجيه العميل للجهة الصحيحة",
-        "متابعة الطلبات حتى الإنجاز وحل الاعتراضات بهدوء",
-        "السرية والأمانة والمحافظة على صورة المكتب",
+        ("استقبال المراجعين والرد على الاستفسارات", 5),
+        ("الاستماع الفعّال وحل الاعتراضات", 4),
+        ("متابعة الطلبات حتى الإنجاز", 5),
+        ("السرية والأمانة والالتزام", 5),
     ]),
-    ("المنصات الإلكترونية والأنظمة", [
-        "سرعة عالية في تعلّم أي منصة أو نظام جديد",
-        "جاهزية للعمل على: **أبشر، قوى، ناجز، اعتماد**",
-        "إدخال الطلبات في الأنظمة ومتابعة حالتها وتحديثها",
-        "رفع المستندات إلكترونيًا والتأكد من اكتمالها",
+    ("المنصات الحكومية والأنظمة", [
+        ("سرعة تعلّم أي منصة أو نظام جديد", 5),
+        ("أبشر، قوى، ناجز، اعتماد — جاهز للعمل عليها", 4),
+        ("إدخال الطلبات ومتابعة الحالة وتحديثها", 4),
+        ("رفع المستندات إلكترونيًا والتأكد من اكتمالها", 4),
     ]),
-    ("الذكاء الاصطناعي وإنتاجية المكتب", [
-        "**ChatGPT + Gemini + Copilot** في الصياغة والتلخيص",
-        "كتابة الأوامر (Prompts) والحصول على مخرجات دقيقة",
-        "تلخيص المستندات الطويلة واستخراج نقاطها في دقائق",
-        "أتمتة المهام المتكررة وتنظيم المراسلات والبيانات",
-    ]),
-    ("التقنية والتسويق الرقمي", [
-        "إعداد المواقع والصفحات التعريفية (HTML + CSS)",
-        "**Canva** وإعداد المحتوى والتصاميم والمطبوعات",
-        "إدارة صفحات التواصل وتحسين الظهور (SEO)",
-        "أساسيات البرمجة وقواعد البيانات وتحليل الأرقام",
+    ("أدوات الذكاء الاصطناعي", [
+        ("ChatGPT و Gemini و Copilot", 4),
+        ("تلخيص المستندات الطويلة واستخراج النقاط", 4),
+        ("صياغة الخطابات والمراسلات", 4),
+        ("أتمتة المهام المتكررة وتنظيم البيانات", 3),
     ]),
 ]
-for title, items in skills:
-    p = para(before=3, after=1, keep=True)
-    _run(p, "◆ ", size=9, color=RGBColor(0xB0, 0x8D, 0x3F))
-    _run(p, title, size=9.8, bold=True, color=ACC2)
-    bullets(items, size=9.0, after=0.8)
 
-# ================= الخبرة =================
-section("الخبرة العملية", "EXPERIENCE")
+for gtitle, items in skill_groups:
+    p = para(before=5, after=2)
+    _run(p, gtitle, size=8.5, bold=True, color=ACCENT)
+    rows = [items[i:i + 2] for i in range(0, len(items), 2)]
+    for pair in rows:
+        tbl = doc.add_table(rows=1, cols=2)
+        tbl.alignment = WD_TABLE_ALIGNMENT.LEFT
+        tbl.autofit = False
+        no_borders(tbl)
+        widths = [Cm(8.3), Cm(8.3)]
+        for col_idx, it in enumerate(pair):
+            cell = tbl.cell(0, col_idx)
+            cell.width = widths[col_idx]
+            cp = cell.paragraphs[0]
+            cp.paragraph_format.space_after = Pt(0)
+            cp.paragraph_format.line_spacing = 1.0
+            _run(cp, dots(it[1]) + "   ", size=8.8, color=ACCENT)
+            _run(cp, it[0], size=8.8, color=BODY)
+            if len(pair) == 1:
+                break
 
-def job(title, org, meta, items):
-    p = para(before=4, after=1, keep=True)
-    _run(p, title, size=10.3, bold=True, color=INK)
-    _run(p, "  —  " + org, size=9.8, bold=True, color=ACCENT)
-    _run(p, "        " + meta, size=8.8, color=MUTED)
-    bullets(items, size=9.5)
+# ---------------- الخبرة ----------------
+section_heading("الخبرة العملية", "EXPERIENCE")
 
-job("موظف إداري ومكتبي — خدمات المستندات", "مكتبة ومركز خدمات", "الرياض  •  2023 – 2025 (سنتان)", [
-    "إعداد وكتابة وتنسيق المستندات والخطابات الرسمية بالعربية والإنجليزية ومراجعتها قبل الطباعة.",
-    "تلخيص المعاملات وتجهيز ملخصات واضحة عنها، ما ساعد على سرعة المراجعة والإنجاز.",
-    "إدخال البيانات وتنظيم السجلات على **Excel** وترتيب الأرشفة الورقية والإلكترونية.",
-    "توظيف أدوات الذكاء الاصطناعي في الصياغة والتلخيص وتجهيز قوالب جاهزة للمستندات المتكررة.",
-    "استقبال العملاء والرد على استفساراتهم ومتابعة طلباتهم حتى إتمامها بصورة مرضية.",
-    "تشغيل أجهزة الطباعة والنسخ والمسح الضوئي ومعالجة الأعطال البسيطة والنسخ الاحتياطي.",
-    "دعم فريق العمل في المهام اليومية وتجهيز المستندات المطلوبة في المواعيد المحددة.",
-])
-job("مسؤول مبيعات وكاشير", "متجر تجزئة", "الرياض  •  2025", [
+
+def job(title, org, meta, items, first=False):
+    p = para(before=(0 if first else 6), after=1)
+    _run(p, title, size=10, bold=True, color=INK)
+    _run(p, "     " + meta, size=8.2, color=MUTED)
+    p = para(before=0, after=1)
+    _run(p, "— " + org, size=9.2, bold=True, color=ACCENT)
+    for it in items:
+        p = para(before=0, after=0.5, ls=1.18)
+        p.paragraph_format.left_indent = Cm(0.4)
+        _run(p, "•  ", size=8.9, bold=True, color=ACCENT)
+        _run(p, it, size=8.9)
+
+
+job("موظف إداري ومكتبي — خدمات المستندات", "مكتبة ومركز خدمات",
+    "الرياض • 2023 – 2025 (سنتان)", [
+    "إعداد وتنسيق المستندات والخطابات الرسمية بالعربية والإنجليزية ومراجعتها قبل الطباعة.",
+    "تلخيص المعاملات وتجهيز ملخصات واضحة عنها، ما رفع سرعة المراجعة والإنجاز.",
+    "إدخال البيانات وتنظيم السجلات على Excel والأرشفة الورقية والإلكترونية.",
+    "استقبال المراجعين والرد على استفساراتهم ومتابعة طلباتهم حتى إتمامها بصورة مرضية.",
+    "توظيف أدوات الذكاء الاصطناعي في الصياغة والتلخيص وتجهيز قوالب للمستندات المتكررة.",
+], first=True)
+
+job("مسؤول مبيعات وكاشير", "متجر تجزئة", "الرياض • 2025", [
     "تعامل يومي مباشر مع العملاء: استقبال، شرح، معالجة اعتراضات، وإتمام الطلب بلباقة.",
     "إدخال البيانات وإعداد تقارير المبيعات ومطابقة الأرقام بدقة على Excel.",
 ])
 
-# ================= التعليم =================
-section("المؤهل العلمي", "EDUCATION")
-p = para(after=2)
-_run(p, "دبلوم لمدة سنتين — التخصص: ........", size=10.2, bold=True, color=INK)
-_run(p, "    |    اسم الجهة التعليمية", size=9.8, color=ACCENT)
-_run(p, "        2026", size=8.8, color=MUTED)
+# ---------------- المؤهل العلمي ----------------
+section_heading("المؤهل العلمي", "EDUCATION")
+p = para(before=2, after=1)
+_run(p, "دبلوم لمدة سنتين", size=9.8, bold=True, color=INK)
+_run(p, "     2026", size=8.3, color=MUTED)
+p = para(before=0)
+_run(p, "التخصص: ........ — اسم الجهة التعليمية", size=8.6, bold=True, color=ACCENT)
+p = para(before=0)
+_run(p, "خلفية تعزز الدقة والانضباط وتنظيم البيانات والتعامل مع الأرقام.", size=8.4, color=MUTED)
 
-# ================= الدورات =================
-section("الدورات والشهادات", "CERTIFICATES")
-bullets([
-    "الحاسب الآلي / ICDL   •   Excel للمبتدئين   •   Word — إعداد المستندات الاحترافية",
-    "خدمة العملاء والتعامل مع الجمهور   •   أدوات الذكاء الاصطناعي   •   التسويق الرقمي",
-], size=9.0)
+# ---------------- الدورات ----------------
+section_heading("الدورات والشهادات", "CERTIFICATES")
+p = para(before=2)
+for t in ["الحاسب الآلي / ICDL", "Excel للمبتدئين", "Word — المستندات الاحترافية",
+          "خدمة العملاء", "أدوات الذكاء الاصطناعي"]:
+    _run(p, "•  ", size=8.6, bold=True, color=ACCENT)
+    _run(p, t, size=8.6, color=BODY)
+    _run(p, "   ", size=8.6)
 
-# ================= اللغات والمهارات الشخصية =================
-section("اللغات والمهارات الشخصية", "LANGUAGES & SOFT SKILLS")
-bullets([
-    "**العربية:** اللغة الأم — إجادة تامة تحدثًا وكتابة.",
-    "**الإنجليزية:** جيد — قراءة وكتابة المراسلات والمستندات.",
-    "**سرعة التعلّم:** أتعلّم الأنظمة الجديدة بسرعة وأطوّر نفسي باستمرار.",
-    "**الشخصية:** أمانة، التزام، لباقة، تنظيم، عمل بروح الفريق، مرونة.",
-    "**تحت الضغط:** أداء ثابت مع كثرة المراجعين وتعدد المهام.",
-    "**المظهر والحضور:** مظهر مهني لائق واحترام المواعيد.",
-], size=9.4)
+# ---------------- اللغات والمهارات الشخصية ----------------
+section_heading("اللغات والمهارات الشخصية", "LANGUAGES & SOFT SKILLS")
+rows = [
+    ("العربية", "اللغة الأم — إجادة تامة تحدثًا وكتابة"),
+    ("الإنجليزية", "جيد — قراءة وكتابة المراسلات والمستندات"),
+    ("سرعة التعلّم", "أتعلّم الأنظمة الجديدة بسرعة وأطوّر نفسي باستمرار"),
+    ("الشخصية", "أمانة، التزام، لباقة، تنظيم، روح الفريق"),
+    ("تحت الضغط", "أداء ثابت مع كثرة المراجعين وتعدد المهام"),
+    ("المظهر والحضور", "مظهر مهني لائق واحترام المواعيد"),
+]
+i = 0
+while i < len(rows):
+    pair = rows[i:i + 2]
+    tbl = doc.add_table(rows=1, cols=2)
+    tbl.autofit = False
+    light_bottom(tbl)
+    widths = [Cm(8.3), Cm(8.3)]
+    for col_idx, (k, v) in enumerate(pair):
+        cell = tbl.cell(0, col_idx)
+        cell.width = widths[col_idx]
+        cp = cell.paragraphs[0]
+        cp.paragraph_format.space_after = Pt(1)
+        cp.paragraph_format.line_spacing = 1.05
+        _run(cp, k + ": ", size=8.9, bold=True, color=ACC2)
+        _run(cp, v, size=8.9, color=BODY)
+    i += 2
 
-# ================= معلومات إضافية =================
-section("معلومات إضافية", "ADDITIONAL")
-bullets([
-    "**الجاهزية:** متاح للعمل فورًا بعد استكمال إجراءات التوظيف.",
-    "**السكن:** قريب من غرب الرياض — سهولة الوصول والالتزام بوقت الدوام.",
-    "**المصادر:** لينكدإن والموقع الشخصي أعلاه للاطلاع على الأعمال.\n**التوصيات:** متاحة عند الطلب.",
-    "**العمل الميداني:** مستعد لتغطية مهام المراجعات والجهات الحكومية عند الحاجة.",
-], size=9.4)
+# ---------------- معلومات إضافية ----------------
+section_heading("معلومات إضافية", "ADDITIONAL")
+rows = [
+    ("الجاهزية", "متاح للعمل فورًا بعد استكمال إجراءات التوظيف"),
+    ("السكن", "قريب من غرب الرياض — سهولة الوصول للدوام"),
+    ("الحالة النظامية", "تأشيرة زيارة عائلية — جاهز لاستكمال الإجراءات"),
+    ("المصادر", "لينكدإن والموقع الشخصي أعلاه للاطلاع على الأعمال"),
+]
+i = 0
+while i < len(rows):
+    pair = rows[i:i + 2]
+    tbl = doc.add_table(rows=1, cols=2)
+    tbl.autofit = False
+    light_bottom(tbl)
+    widths = [Cm(8.3), Cm(8.3)]
+    for col_idx, (k, v) in enumerate(pair):
+        cell = tbl.cell(0, col_idx)
+        cell.width = widths[col_idx]
+        cp = cell.paragraphs[0]
+        cp.paragraph_format.space_after = Pt(1)
+        cp.paragraph_format.line_spacing = 1.05
+        _run(cp, k + ": ", size=8.9, bold=True, color=ACC2)
+        _run(cp, v, size=8.9, color=BODY)
+    i += 2
 
-doc.save("cv/cv-general-services.docx")
-print("saved")
+# ---------------- تذييل ----------------
+p = para(before=10)
+border_bottom(p, color="E2E8F1", size=4)
+_run(p, "", size=1)
+p = para(before=2)
+_run(p, "سيرة ذاتية — محمد البخيتي  •  موظف مكتب خدمات عامة  •  الرياض",
+     size=7.5, color=RGBColor(0x9A, 0xAE, 0xC0))
+_run(p, "     +966 56 674 3293", size=8, bold=True, color=ACCENT)
+
+out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cv-general-services.docx")
+doc.save(out)
+print("saved:", out)

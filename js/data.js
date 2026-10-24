@@ -27,7 +27,8 @@
     { id: 'minimal', name: { ar: 'بسيط',    en: 'Minimal' }, desc: { ar: 'خطوط نظيفة ومساحات بيضاء',   en: 'Clean lines, plenty of whitespace' } },
     { id: 'elegant', name: { ar: 'أنيق',    en: 'Elegant' }, desc: { ar: 'ترويسة ملوّنة وعمودان',       en: 'Accent banner with two columns' } },
     { id: 'profile', name: { ar: 'ملفّي داكن', en: 'Profile Dark' }, desc: { ar: 'ترويسة كبيرة وبطاقات أرقام وشريط جانبي داكن', en: 'Big banner, stat cards, dark sidebar' } },
-    { id: 'profile-light', name: { ar: 'ملفّي فاتح', en: 'Profile Light' }, desc: { ar: 'ترويسة ملوّنة وشريط جانبي فاتح', en: 'Colored banner with light sidebar' } }
+    { id: 'profile-light', name: { ar: 'ملفّي فاتح', en: 'Profile Light' }, desc: { ar: 'ترويسة ملوّنة وشريط جانبي فاتح', en: 'Colored banner with light sidebar' } },
+    { id: 'pro', name: { ar: 'احترافي', en: 'Professional' }, desc: { ar: 'عمود واحد، مساحات بيضاء، خطوط نظيفة وعناوين ملوّنة — لا تكدّس', en: 'Single column, whitespace, clean typography — no clutter' } }
   ];
 
   var LABELS = {
@@ -785,6 +786,100 @@
       '</div>';
   }
 
+  /* ----------------------- pro template (clean professional) ----------------------- */
+  /* تصميم احترافي نظيف: عمود واحد، مساحات بيضاء، خطوط نظيفة،
+     عناوين ملوّنة بشريط دقيق — بدون بطاقات أو أشرطة جانبية أو تكدّس. */
+  function proContactHtml(p) {
+    var items = [];
+    function add(kind, val, href) {
+      if (!val) return;
+      var ltr = kind === 'phone' || kind === 'mail' || kind === 'link' ||
+        kind === 'linkedin' || kind === 'github' || kind === 'behance' || kind === 'x';
+      var inner = ltr ? '<bdi dir="ltr">' + esc(val) + '</bdi>' : esc(val);
+      if (href) {
+        items.push('<span class="cv-c"><a href="' + href + '"' +
+          (kind === 'phone' ? '' : ' target="_blank" rel="noopener"') + '>' +
+          ico(kind) + '<span>' + inner + '</span></a></span>');
+      } else {
+        items.push('<span class="cv-c">' + ico(kind) + '<span>' + inner + '</span></span>');
+      }
+    }
+    add('phone', p.phone, 'tel:' + String(p.phone || '').replace(/\s|-/g, ''));
+    add('mail', p.email, 'mailto:' + p.email);
+    add('pin', p.city, null);
+    add('link', prettyUrl(p.website), p.website);
+    add('linkedin', prettyUrl(p.linkedin), p.linkedin);
+    add('github', prettyUrl(p.github), p.github);
+    add('behance', prettyUrl(p.behance), p.behance);
+    add('x', prettyUrl(p.x), p.x);
+    return items.length ? '<div class="cv-contact">' + items.join('') + '</div>' : '';
+  }
+
+  function proHtml(cv, L) {
+    var p = cv.personal || {};
+    var e = cv.extra || {};
+    var name = (p.fullName || '').trim() || (cv.lang === 'en' ? 'Your Name' : 'الاسم الكامل');
+    var title = (p.jobTitle || '').trim();
+    var contact = proContactHtml(p);
+    var wa = String(e.whatsapp || '').replace(/[^0-9]/g, '');
+    var waBtn = wa
+      ? '<span class="cv-c"><a class="pro-wa" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' +
+        ico('phone') + '<span>واتساب ' + esc(wa) + '</span></a></span>'
+      : '';
+
+    var head = '<header class="cv-head">' +
+      '<h1 class="cv-name">' + esc(name) + '</h1>' +
+      (title ? '<div class="cv-role">' + esc(title) + '</div>' : '') +
+      ((contact || waBtn) ? '<div class="cv-contact">' + contact + waBtn + '</div>' : '') +
+      '</header><div class="pro-rule"></div>';
+
+    var sum = summaryHtml(cv, L);
+
+    /* المهارات: مجموعات بخطوط نظيفة ونقاط مستوى */
+    var groups = skillGroups(cv);
+    var skillsHtml = groups.length
+      ? sec(L.skills, '<div class="pro-skills">' + groups.map(function (g) {
+          return (g.title ? '<div class="pro-skill-cat">' + esc(g.title) + '</div>' : '') +
+            '<div class="pro-skill-row">' + g.items.map(function (s) {
+              return '<div class="pro-skill-line"><span>' + esc(s.name) + '</span>' + dots(s.level) + '</div>';
+            }).join('') + '</div>';
+        }).join('') + '</div>')
+      : '';
+
+    var exp = experienceHtml(cv, L);
+    var edu = educationHtml(cv, L);
+    var certs = certsHtml(cv, L);
+
+    /* اللغات: صفوف نظيفة في عمودين */
+    var langs = (cv.languages || []).filter(function (x) { return x && x.name; });
+    var langsHtml = langs.length
+      ? sec(L.languages, '<div class="pro-langs">' + langs.map(function (it) {
+          return '<div class="pro-lang-line"><span>' + esc(it.name) + '</span><em>' +
+            esc(it.note || langLevelText(it.level, cv.lang)) + '</em></div>';
+        }).join('') + '</div>')
+      : '';
+
+    /* معلومات إضافية: نقاط مدمجة */
+    var ready = (e.readiness || []).filter(Boolean);
+    var readyHtml = ready.length
+      ? sec(cv.lang === 'ar' ? 'معلومات إضافية' : 'Additional Information',
+        '<ul class="pro-ready">' + ready.map(function (r) {
+          return '<li>' + esc(r) + '</li>';
+        }).join('') + '</ul>')
+      : '';
+
+    var foot = '<footer class="pro-foot">' +
+      (e.footerNote ? '<span>' + esc(e.footerNote) + '</span>' : '') +
+      (p.phone ? '<span class="pro-foot-phone"><bdi dir="ltr">' + esc(p.phone) + '</bdi></span>' : '') +
+      '</footer>';
+
+    return '<div class="cv-page tpl-pro" dir="' + (cv.lang === 'en' ? 'ltr' : 'rtl') +
+      '" style="--cv-accent:' + esc(cv.accent || '#2f4f8f') +
+      ';--cv-accent2:' + esc(cv.accent2 || '#c9a227') + '">' +
+      head + sum + skillsHtml + exp + edu + certs + langsHtml + readyHtml + foot +
+      '</div>';
+  }
+
   /* ----------------------- main renderer ----------------------- */
   function renderCv(cv, tplId) {
     cv = cv || {};
@@ -818,6 +913,10 @@
 
     if (tpl === 'ats' || tpl === 'ats-modern') {
       return atsHtml(cv, L, tpl === 'ats-modern');
+    }
+
+    if (tpl === 'pro') {
+      return proHtml(cv, L);
     }
 
     var open = '<div class="cv-page tpl-' + tpl + '" dir="' + dir + '" style="--cv-accent:' + esc(accent) +
