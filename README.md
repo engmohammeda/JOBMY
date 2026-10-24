@@ -6,6 +6,14 @@
 ## التشغيل
 افتح `index.html` بالنقر المزدوج (يُفضَّل Chrome أو Edge). كل شيء يعمل من الملف مباشرة.
 
+### تشغيل محلي عبر سيرفر (مستحسن للتطوير)
+```bash
+python3 serve.py            # http://localhost:8080
+PORT=3000 python3 serve.py  # منفذ مخصص
+```
+يستمع على `0.0.0.0` (لذلك يعمل داخل المعاينة السحابية)، ويضيف `no-store` حتى تظهر التعديلات
+فورًا، ويضبط أنواع MIME المهمة (`js`, `woff2`, `pdf`, `docx`…) بدل `application/octet-stream`.
+
 ## النشر على GitHub Pages
 1. من المستودع: **Settings ← Pages**.
 2. اختر **Deploy from a branch** ثم الفرع `main` والمجلد `/ (root)`.
