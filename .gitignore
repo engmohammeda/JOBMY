@@ -9,3 +9,7 @@ Thumbs.db
 desktop.ini
 *.tmp
 *.log
+
+# python
+__pycache__/
+*.pyc

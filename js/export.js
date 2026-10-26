@@ -34,7 +34,8 @@
 
   function cvCss() {
     var el = document.getElementById('cv-styles');
-    return el ? el.textContent : '';
+    var fonts = document.getElementById('elite-fonts');
+    return (fonts ? fonts.textContent : '') + (el ? el.textContent : '');
   }
 
   function waitForImages(root) {

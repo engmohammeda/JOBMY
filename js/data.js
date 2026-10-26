@@ -22,6 +22,7 @@
   var TEMPLATES = [
     { id: 'ats', name: { ar: 'ATS كلاسيكي', en: 'ATS Classic' }, desc: { ar: 'عمود واحد، نصوص صريحة، بدون صورة أو أيقونات', en: 'Single column, plain text, no photo or icons' }, ats: true },
     { id: 'ats-modern', name: { ar: 'ATS حديث', en: 'ATS Modern' }, desc: { ar: 'عمود واحد بعناوين ملوّنة وخط واضح', en: 'Single column with colored headings' }, ats: true },
+    { id: 'elite',   name: { ar: 'النخبة',   en: 'Elite'   }, desc: { ar: 'عمود واحد، عناوين مرقّمة وخطوط شعرية — أرقى وأهدأ ما في التطبيق', en: 'Single column, numbered sections, hairline rules — the quietest premium look' } },
     { id: 'modern',  name: { ar: 'عصري',    en: 'Modern'  }, desc: { ar: 'شريط جانبي ملوّن مع صورة', en: 'Colored sidebar with photo' } },
     { id: 'classic', name: { ar: 'كلاسيكي', en: 'Classic' }, desc: { ar: 'عنوان في الوسط وتنسيق رسمي', en: 'Centered header, formal layout' } },
     { id: 'minimal', name: { ar: 'بسيط',    en: 'Minimal' }, desc: { ar: 'خطوط نظيفة ومساحات بيضاء',   en: 'Clean lines, plenty of whitespace' } },
@@ -84,7 +85,7 @@
       back: 'رجوع', cvNamePh: 'اسم السيرة', saved: 'محفوظ تلقائيًا', saving: 'يتم الحفظ…',
       exportBtn: 'تصدير', exportPdf: 'PDF (طباعة / حفظ)', exportWord: 'مستند Word',
       exportPng: 'صورة عالية الدقة', exportHtml: 'صفحة ويب', exportTxt: 'نص عادي',
-      exportJson: 'نسخة احتياطية JSON', preview: 'المعاينة', templateLabel: 'القالب',
+      exportJson: 'نسخة احتياطية JSON', preview: 'المعاينة', templateLabel: 'القالب', matchJob: 'مطابقة الوظيفة',
 
       formPersonal: 'البيانات الشخصية', formExperience: 'الخبرات العملية',
       formEducation: 'المؤهلات العلمية', formSkills: 'المهارات', formLanguages: 'اللغات',
@@ -186,7 +187,7 @@
       back: 'Back', cvNamePh: 'CV name', saved: 'Saved automatically', saving: 'Saving…',
       exportBtn: 'Export', exportPdf: 'PDF (print / save)', exportWord: 'Word document',
       exportPng: 'High-res image', exportHtml: 'Web page', exportTxt: 'Plain text',
-      exportJson: 'JSON backup', preview: 'Preview', templateLabel: 'Template',
+      exportJson: 'JSON backup', preview: 'Preview', templateLabel: 'Template', matchJob: 'Job match',
 
       formPersonal: 'Personal details', formExperience: 'Work experience',
       formEducation: 'Education', formSkills: 'Skills', formLanguages: 'Languages',
@@ -913,6 +914,10 @@
 
     if (tpl === 'ats' || tpl === 'ats-modern') {
       return atsHtml(cv, L, tpl === 'ats-modern');
+    }
+
+    if (tpl === 'elite' && window.CV_ELITE) {
+      return window.CV_ELITE.render(cv);
     }
 
     if (tpl === 'pro') {

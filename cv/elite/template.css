@@ -1,0 +1,131 @@
+/* ============================================================
+   قالب «النخبة» — Elite
+   عمود واحد · عناوين مرقّمة · خطوط شعرية · مساحات بيضاء
+   ============================================================ */
+.tpl-elite{
+  padding:11mm 15mm 7mm 17mm;
+  font-size:9.1pt;line-height:1.62;color:#333F4E;
+  --el-ink:#141E2B;--el-body:#333F4E;--el-muted:#6C7887;
+  --el-hair:#E4E9EF;--el-hair2:#D3DBE4;--el-soft:#F5F8FB;
+}
+.tpl-elite[dir="ltr"]{padding:11mm 17mm 7mm 15mm}
+.tpl-elite::before{
+  content:"";position:absolute;inset-block:0;inset-inline-start:0;width:2.3mm;
+  background:linear-gradient(180deg,var(--cv-accent) 0%,var(--cv-accent) 46%,var(--cv-accent2) 46%,var(--cv-accent2) 100%);
+}
+.tpl-elite p{margin:0}
+.tpl-elite a{color:inherit;text-decoration:none}
+.tpl-elite ul{list-style:none;margin:0;padding:0}
+
+/* ---------- header ---------- */
+.tpl-elite .el-head{padding-bottom:3.6mm;border-bottom:.45mm solid var(--el-hair2)}
+.tpl-elite .el-eyebrow{
+  display:flex;align-items:center;justify-content:space-between;gap:6mm;
+  font-size:7.3pt;letter-spacing:.16em;color:var(--el-muted);
+  text-transform:uppercase;margin-bottom:3.2mm;
+}
+.tpl-elite .el-tag{
+  display:inline-flex;align-items:center;gap:1.8mm;letter-spacing:.06em;
+  font-size:7.6pt;color:var(--cv-accent);font-weight:600;text-transform:none;
+}
+.tpl-elite .el-tag::before{
+  content:"";width:1.9mm;height:1.9mm;border-radius:50%;background:var(--cv-accent2);
+  box-shadow:0 0 0 1.1mm rgba(180,135,74,.16);
+}
+.tpl-elite .el-name{font-size:25pt;line-height:1.06;font-weight:700;letter-spacing:-.012em;color:var(--el-ink)}
+.tpl-elite .el-role{margin-top:1.8mm;font-size:10.1pt;font-weight:500;color:var(--cv-accent)}
+.tpl-elite .el-meta{
+  display:flex;flex-wrap:wrap;row-gap:1.5mm;column-gap:5.2mm;
+  margin-top:3.2mm;font-size:8.1pt;color:var(--el-body);
+}
+.tpl-elite .el-meta li{display:inline-flex;align-items:center;gap:1.7mm;line-height:1.35;max-width:100%}
+.tpl-elite .el-meta svg{width:3.2mm;height:3.2mm;flex:0 0 auto;color:var(--cv-accent);opacity:.9}
+.tpl-elite .el-meta a,.tpl-elite .el-meta bdi{overflow-wrap:anywhere}
+
+/* ---------- sections ---------- */
+.tpl-elite .el-sec{margin-top:3.9mm;break-inside:avoid}
+.tpl-elite .el-sec-head{
+  display:flex;align-items:baseline;gap:3mm;
+  padding-bottom:1.2mm;margin-bottom:2.4mm;border-bottom:.35mm solid var(--el-hair);
+}
+.tpl-elite .el-sec-num{
+  font-size:7.2pt;font-weight:600;color:var(--cv-accent2);
+  letter-spacing:.08em;font-variant-numeric:tabular-nums;
+}
+.tpl-elite .el-sec-head h2{font-size:11.4pt;font-weight:600;color:var(--el-ink);line-height:1.2;margin:0}
+.tpl-elite .el-sec-en{
+  margin-inline-start:auto;font-size:6.4pt;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--el-muted);font-weight:500;white-space:nowrap;direction:ltr;
+}
+
+/* ---------- summary ---------- */
+.tpl-elite .el-summary{
+  font-size:9.25pt;line-height:1.72;text-align:justify;text-justify:inter-word;color:var(--el-body);
+}
+
+/* ---------- experience ---------- */
+.tpl-elite .el-exp+.el-exp{margin-top:3.2mm;padding-top:3.2mm;border-top:.3mm dashed var(--el-hair)}
+.tpl-elite .el-exp-top{display:flex;align-items:baseline;justify-content:space-between;gap:7mm}
+.tpl-elite .el-exp-role{font-size:10.2pt;font-weight:600;color:var(--el-ink);line-height:1.35;margin:0}
+.tpl-elite .el-exp-date{
+  font-size:8pt;color:var(--el-muted);white-space:nowrap;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;
+}
+.tpl-elite .el-exp-org{margin-top:.7mm;font-size:8.7pt;color:var(--cv-accent);font-weight:500}
+.tpl-elite .el-bullets{margin-top:1.7mm;display:flex;flex-direction:column;gap:.55mm}
+.tpl-elite .el-bullets li{
+  position:relative;padding-inline-start:4.6mm;font-size:8.9pt;line-height:1.62;color:var(--el-body);
+}
+.tpl-elite .el-bullets li::before{
+  content:"";position:absolute;inset-inline-start:1.05mm;top:.72em;
+  width:1.5mm;height:1.5mm;background:var(--cv-accent);opacity:.72;
+}
+.tpl-elite .el-text{margin-top:.8mm;font-size:9.1pt;line-height:1.7}
+
+/* ---------- skills ---------- */
+.tpl-elite .el-skills{display:grid;grid-template-columns:32mm minmax(0,1fr);column-gap:6mm;row-gap:1.8mm;margin:0}
+.tpl-elite .el-skills dt{font-size:8.55pt;font-weight:600;color:var(--el-ink);line-height:1.6;padding-top:.1mm}
+.tpl-elite .el-skills dd{font-size:8.9pt;line-height:1.6;color:var(--el-body);margin:0}
+.tpl-elite .el-skills dd i{font-style:normal;color:var(--cv-accent2);margin:0 1.1mm;opacity:.85}
+
+/* ---------- three columns ---------- */
+.tpl-elite .el-cols{display:grid;grid-template-columns:1.08fr .84fr 1.08fr;column-gap:6mm}
+.tpl-elite .el-col-h{
+  font-size:7.7pt;font-weight:600;color:var(--el-muted);letter-spacing:.1em;
+  padding-bottom:1.1mm;margin-bottom:1.8mm;border-bottom:.3mm solid var(--el-hair);
+}
+.tpl-elite .el-kv{font-size:8.7pt;line-height:1.6;color:var(--el-body);margin-bottom:1.4mm}
+.tpl-elite .el-kv b{display:block;color:var(--el-ink);font-weight:600}
+.tpl-elite .el-sub{display:block;font-size:7.95pt;color:var(--el-muted)}
+.tpl-elite .el-note{display:block;font-size:7.9pt;color:var(--el-muted);line-height:1.55;margin-top:.8mm}
+.tpl-elite .el-chips{display:flex;flex-wrap:wrap;gap:1.1mm 1.3mm}
+.tpl-elite .el-chip{
+  font-size:7.6pt;line-height:1.45;color:var(--cv-accent);
+  background:var(--el-soft);border:.25mm solid #E6EDF4;
+  padding:.45mm 2mm;border-radius:.9mm;white-space:nowrap;
+}
+.tpl-elite .el-chip i{font-style:normal;color:var(--el-muted);margin-inline-start:1.4mm;font-size:7.1pt}
+
+/* ---------- availability ---------- */
+.tpl-elite .el-ready{
+  padding:2.4mm 3.4mm;background:var(--el-soft);
+  border-inline-start:.8mm solid var(--cv-accent2);
+  font-size:8.05pt;line-height:1.75;color:var(--el-body);
+}
+.tpl-elite .el-ready span{display:inline-flex;align-items:center;gap:1.6mm;margin-inline-end:5mm}
+.tpl-elite .el-ready span::before{
+  content:"";width:1.2mm;height:1.2mm;background:var(--cv-accent);opacity:.5;border-radius:50%;
+}
+
+/* ---------- footer ---------- */
+.tpl-elite .el-foot{
+  margin-top:auto;padding-top:3mm;border-top:.3mm solid var(--el-hair);
+  display:flex;align-items:center;justify-content:space-between;gap:6mm;
+  font-size:7.4pt;color:var(--el-muted);letter-spacing:.02em;
+}
+.tpl-elite .el-foot-meta{font-variant-numeric:tabular-nums}
+.tpl-elite .el-foot-meta b{color:var(--cv-accent);font-weight:600}
+
+/* الورقة تحتاج flex حتى يلتصق التذييل بأسفل الصفحة */
+.cv-page.tpl-elite{display:flex;flex-direction:column;min-height:297mm}
+.tpl-elite .el-sec:last-of-type{margin-bottom:0}

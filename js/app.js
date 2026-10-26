@@ -219,7 +219,12 @@
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     var btn = $('#btnTheme');
-    if (btn) btn.textContent = theme === 'dark' ? '☀' : '🌙';
+    if (btn) {
+      btn.innerHTML = theme === 'dark'
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.4A8.6 8.6 0 0 1 9.6 3.5 8.6 8.6 0 1 0 20.5 14.4z"/></svg>';
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Light theme' : 'Dark theme');
+    }
   }
 
   function applyI18n() {
@@ -590,6 +595,41 @@
     holder.innerHTML = CV.renderCv(cv);
     fitPreview();
     renderAtsBar(cv);
+    updatePageFit();
+  }
+
+  /* مؤشر «صفحة واحدة A4»: يقيس ارتفاع الورقة الفعلي ويخبرك إن تجاوزت الصفحة */
+  function updatePageFit() {
+    var chip = $('#pageFit');
+    var page = $('#cvHolder .cv-page');
+    if (!chip || !page) return;
+    var probe = page.cloneNode(true);
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.style.insetInlineStart = '-9999px';
+    probe.style.top = '0';
+    probe.style.transform = 'none';
+    probe.style.minHeight = '0';
+    hover_append(probe);
+    var mm = probe.getBoundingClientRect().height / (96 / 25.4);
+    probe.remove();
+
+    var one = mm <= 298.5;
+    chip.hidden = false;
+    chip.className = 'page-fit ' + (one ? 'ok' : 'over');
+    var lang = state.ui.lang;
+    chip.textContent = one
+      ? (lang === 'ar' ? 'صفحة واحدة A4' : 'Fits one A4 page')
+      : (lang === 'ar'
+        ? 'تتجاوز A4 بـ ' + Math.round(mm - 297) + ' مم — قلّل المحتوى'
+        : 'Overflows A4 by ' + Math.round(mm - 297) + 'mm');
+    chip.title = lang === 'ar'
+      ? 'ارتفاع المحتوى: ' + mm.toFixed(0) + ' مم من 297 مم'
+      : 'Content height: ' + mm.toFixed(0) + 'mm of 297mm';
+  }
+
+  function hover_append(el) {
+    document.body.appendChild(el);
   }
 
   function fitPreview() {
@@ -772,6 +812,17 @@
   }
   function closeExportMenu() { toggleExportMenu(false); }
 
+  /* ------------------------- public hooks ------------------------- */
+  /* تُستخدم من وحدات مستقلة (مثل match.js) دون كسر نطاق التطبيق */
+  window.SIRATI_APP = {
+    getCurrent: function () { return getCurrent(); },
+    openModal: function (html) { openModal(html); },
+    closeModal: function () { closeModal(); },
+    toast: function (msg, isErr) { toast(msg, isErr); },
+    save: function () { saveNow(); },
+    t: function (k) { return t(k); }
+  };
+
   /* ------------------------- photo ------------------------- */
   function pickPhoto() { $('#photoInput').click(); }
 
@@ -910,6 +961,11 @@
       cv.template = e.target.value;
       markDirty();
       renderPreview();
+    });
+
+    var matchBtn = $('#btnMatch');
+    if (matchBtn) matchBtn.addEventListener('click', function () {
+      if (window.CV_MATCH) CV_MATCH.open();
     });
 
     var atsFix = $('#btnAtsFix');
@@ -1066,8 +1122,13 @@
     });
 
     $('#modalRoot').addEventListener('click', function (e) {
-      var close = e.target.closest('[data-close]');
-      if (close) { closeModal(); return; }
+      /* إغلاق فقط عند النقر على الخلفية نفسها أو على زر إغلاق —
+         سابقًا كانت أي نقرة داخل النافذة تُغلقها قبل تنفيذ الإجراء. */
+      var closeEl = e.target.closest('[data-close]');
+      if (closeEl && (closeEl === e.target || closeEl.tagName === 'BUTTON')) {
+        closeModal();
+        return;
+      }
 
       var sw = e.target.closest('[data-modal-accent]');
       if (sw) {
