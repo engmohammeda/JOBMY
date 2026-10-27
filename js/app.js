@@ -112,6 +112,56 @@
     };
   }
 
+  /* ------------------- ترحيل الموقع الجغرافي -------------------
+     - السكن المعتمد: «الرياض — البطحاء».
+     - لا تُذكر أي مدينة داخل الخبرات العملية (الخبرات السابقة لم تكن في السعودية).
+     آمنة للتكرار: تعمل مرة واحدة فعليًا ثم لا تجد ما تغيّره. */
+  var READY_FIX = {
+    'مقيم حاليًا في الرياض، السعودية': 'مقيم في الرياض — البطحاء',
+    'مقيم في الرياض، السعودية': 'مقيم في الرياض — البطحاء',
+    'مقيم في الرياض — قريب من غرب الرياض، متاح للعمل فورًا': 'مقيم في الرياض — البطحاء، متاح للعمل فورًا',
+    'مقيم في الرياض (غرب الرياض) — انتقال مستقل': 'مقيم في الرياض — البطحاء، انتقال مستقل',
+    'مقيم في الرياض (غرب الرياض) — انتقال مستقل': 'مقيم في الرياض — البطحاء، انتقال مستقل'
+  };
+
+  function fixCity(city) {
+    var c = String(city || '').trim();
+    if (!c) return c;
+    c = c.replace(/غرب الرياض/g, 'البطحاء');
+    if (/^الرياض$/.test(c)) c = 'الرياض — البطحاء';
+    return c;
+  }
+
+  function migrateLocations(cvs) {
+    var changed = false;
+    (cvs || []).forEach(function (cv) {
+      if (!cv) return;
+      var p = cv.personal || (cv.personal = {});
+      var c = fixCity(p.city);
+      if (c !== (p.city || '')) { p.city = c; changed = true; }
+
+      (cv.experience || []).forEach(function (x) {
+        if (!x) return;
+        var co = String(x.company || '');
+        var n = co.replace(/\s*[-—–]\s*الرياض\s*$/, '').replace(/\s{2,}/g, ' ').trim();
+        if (n !== co) { x.company = n; changed = true; }
+        if (x.place && /الرياض/.test(String(x.place))) { delete x.place; changed = true; }
+      });
+
+      var ex = cv.extra;
+      if (ex && Array.isArray(ex.readiness)) {
+        ex.readiness = ex.readiness.map(function (r) {
+          var v = String(r);
+          if (READY_FIX[v]) { changed = true; return READY_FIX[v]; }
+          var n2 = v.replace(/غرب الرياض/g, 'البطحاء');
+          if (n2 !== v) changed = true;
+          return n2;
+        });
+      }
+    });
+    return changed;
+  }
+
   function saveNow() {
     try {
       localStorage.setItem(STORE, JSON.stringify(state));
@@ -1282,6 +1332,7 @@
   function boot() {
     state = loadState();
     importPresets();
+    if (migrateLocations(state.cvs)) saveNow();
     applyTheme(state.ui.theme);
     applyI18n();
     renderHome();
